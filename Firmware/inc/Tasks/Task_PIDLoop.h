@@ -1,10 +1,3 @@
-/*
- * Task_PIDLoop.h
- *
- *  Created on: Apr 27, 2018
- *      Author: simon
- */
-
 #ifndef TASKS_TASK_PIDLOOP_H_
 #define TASKS_TASK_PIDLOOP_H_
 

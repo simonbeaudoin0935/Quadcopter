@@ -1,5 +1,5 @@
-#ifndef TASKS_TASK_IDLE_H_
-#define TASKS_TASK_IDLE_H_
+#ifndef TASKS_TASK_RPIRECEPTION_H_
+#define TASKS_TASK_RPIRECEPTION_H_
 
 #include "FreeRTOS.h"
 #include "task.h"
