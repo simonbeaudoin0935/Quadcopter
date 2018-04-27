@@ -1,6 +1,8 @@
 #include "Tasks/Task_FlashHeartbeatLED.h"
 #include "stm32f4xx.h"
 
+#include "UART/UART6.h"
+//#include "UART/UART2.h"
 
 void vTask_FlashHeartbeatLED(void * pvParameters);
 
@@ -40,9 +42,12 @@ void vTask_FlashHeartbeatLED( void * pvParameters )
 	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;
 	GPIO_Init(GPIOC, &GPIO_InitStruct);
 
+	UART6_init(9600);
+
     while(1)
     {
     	GPIO_ToggleBits(GPIOC, GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
+    	UART6_print("ABC");
         vTaskDelay(1000);
     }
 }
