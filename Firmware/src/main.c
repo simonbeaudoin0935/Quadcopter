@@ -1,38 +1,28 @@
-/**
-  ******************************************************************************
-  * @file    main.c
-  * @author  Ac6
-  * @version V1.0
-  * @date    01-December-2013
-  * @brief   Default main function.
-  ******************************************************************************
-*/
 
-#include <UART/UART1.h>
 #include "FreeRTOS.h"
 #include "Tasks/Task_FlashHeartbeatLED.h"
 #include "Tasks/Task_Idle.h"
 #include "Tasks/Task_RPIReception.h"
+#include "Tasks/Task_PIDLoop.h"
 
-#include "task.h"
 
 #include "stm32f4xx.h"
 
+struct{
+	TaskHandle_t TaskHandle_Idle;
+	TaskHandle_t TaskHandle_FlashHeartbeatLED;
+	TaskHandle_t TaskHandle_RPIReception;
+	TaskHandle_t TaskHandle_PIDLoop;
+}TaskHandles;
 
-TaskHandle_t RPIReception_TaskHandle;
 
 int main(void)
 {
+	TaskHandles.TaskHandle_FlashHeartbeatLED = vCreateTask_FlashHeartbeatLED();
+	TaskHandles.TaskHandle_Idle = vCreateTask_Idle();
+	TaskHandles.TaskHandle_RPIReception = vCreateTask_RPIReception();
+	TaskHandles.TaskHandle_PIDLoop = vCreateTask_PIDLoop();
 
-
-
-
-
-
-	TaskHandle_t handle;
-	handle = vCreateTask_FlashHeartbeatLED();
-	handle = vCreateTask_Idle();
-	RPIReception_TaskHandle = vCreateTask_RPIReception();
 
 	vTaskStartScheduler();
 

@@ -52,6 +52,7 @@
 "src/FreeRTOS/timers.o"
 "src/Tasks/Task_FlashHeartbeatLED.o"
 "src/Tasks/Task_Idle.o"
+"src/Tasks/Task_PIDLoop.o"
 "src/Tasks/Task_RPIReception.o"
 "src/UART/UART1.o"
 "src/UART/UART6.o"

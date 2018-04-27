@@ -3,7 +3,12 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-extern TaskHandle_t RPIReception_TaskHandle;
+extern struct{
+	TaskHandle_t TaskHandle_Idle;
+	TaskHandle_t TaskHandle_FlashHeartbeatLED;
+	TaskHandle_t TaskHandle_RPIReception;
+	TaskHandle_t TaskHandle_PIDLoop;
+}TaskHandles;
 
 static volatile char UART1_rx_buf[UART1_RX_BUFF_SIZE];
 static volatile char UART1_tx_buf[UART1_TX_BUFF_SIZE];
@@ -122,7 +127,6 @@ void UART1_write(char p_data){
   USART1->CR1 |= USART_FLAG_TXE;                          //Active Transmit Empty interrupt, s'il ne l'est pas déjà
 }
 
-
 void UART1_print(char* p_string)
 {  
   while(*p_string != 0)                                   //Tant qu'on a pas atteind la fin de la string
@@ -134,29 +138,6 @@ void UART1_print(char* p_string)
   
 }
 
-
-void UART1_writeFloatUnion(float p_float)
-{
-	floatUnion_t v_floatUnion;
-
-	v_floatUnion.floating = p_float;
-
-	UART1_write(v_floatUnion.bytes[0]);
-	UART1_write(v_floatUnion.bytes[1]);
-	UART1_write(v_floatUnion.bytes[2]);
-	UART1_write(v_floatUnion.bytes[3]);
-}
-void UART1_writeIntegerUnion(int p_integer)
-{
-	intUnion_t v_intUnion;
-
-	v_intUnion.integer = p_integer;
-
-	UART1_write(v_intUnion.bytes[0]);
-	UART1_write(v_intUnion.bytes[1]);
-	UART1_write(v_intUnion.bytes[2]);
-	UART1_write(v_intUnion.bytes[3]);
-}
 
 void USART1_IRQHandler(void)
 { 
@@ -170,7 +151,7 @@ void USART1_IRQHandler(void)
 
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
-    vTaskNotifyGiveFromISR( RPIReception_TaskHandle, &xHigherPriorityTaskWoken);
+    vTaskNotifyGiveFromISR(TaskHandles.TaskHandle_RPIReception, &xHigherPriorityTaskWoken);
 
     portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
   }
