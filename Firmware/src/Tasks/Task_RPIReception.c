@@ -5,7 +5,8 @@
  *      Author: simon
  */
 #include "Tasks/Task_RPIReception.h"
-
+#include "UART/UART1.h"
+#include "Mavlink/common/mavlink.h"
 
 void vTask_RPIReception(void * pvParameters);
 
@@ -30,6 +31,35 @@ TaskHandle_t vCreateTask_RPIReception()
 
 void vTask_RPIReception(void * pvParameters)
 {
+	UART1_init(115200);
 
-	while(1);
+	uint32_t ulNotifiedValue;
+
+	mavlink_message_t rcv_msg;
+	mavlink_status_t rcv_status;
+
+	while(1){
+
+		ulNotifiedValue = ulTaskNotifyTake( pdTRUE, portMAX_DELAY );
+
+		if( ulNotifiedValue == 0 )
+		{
+		    //not supposed to get there
+		}
+		else
+		{
+
+		    while( ulNotifiedValue > 0 )
+		    {
+		        char c = UART1_read();
+
+		        if(mavlink_parse_char(MAVLINK_COMM_0, c, &rcv_msg, &rcv_status))
+		        {
+		        	//handleIncomingMessage(&rcv_msg,&rcv_status);
+		        }
+
+		        ulNotifiedValue--;
+		    }
+		}
+	}
 }

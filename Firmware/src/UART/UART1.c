@@ -167,6 +167,12 @@ void USART1_IRQHandler(void)
     UART1_rx_buf[UART1_rx_head] = USART1->DR;             //On place le byte recu dans le buffer
     
     UART1_rx_head = (UART1_rx_head + 1) % UART1_RX_BUFF_SIZE;   //On incrémente l'indice de tête, et fait un wrap around;
+
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+    vTaskNotifyGiveFromISR( RPIReception_TaskHandle, &xHigherPriorityTaskWoken);
+
+    portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
   }
   
   if(USART1->SR & USART_FLAG_TXE)                         //if tx empty
