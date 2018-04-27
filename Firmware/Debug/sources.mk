@@ -17,6 +17,8 @@ C_DEPS :=
 SUBDIRS := \
 StdPeriph_Driver/src \
 src/FreeRTOS \
+src/Tasks \
+src/UART \
 src \
 startup \
 

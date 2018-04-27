@@ -42,7 +42,7 @@ src/FreeRTOS/%.o: ../src/FreeRTOS/%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: MCU GCC Compiler'
 	@echo $(PWD)
-	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DSTM32 -DSTM32F4 -DSTM32F407VGTx -DSTM32F407G_DISC1 -DDEBUG -DSTM32F40XX -DSTM32F40_41xxx -DUSE_STDPERIPH_DRIVER -I"/home/simon/Documents/Quadcopter/Firmware/StdPeriph_Driver/inc" -I"/home/simon/Documents/Quadcopter/Firmware/inc" -I"/home/simon/Documents/Quadcopter/Firmware/CMSIS/device" -I"/home/simon/Documents/Quadcopter/Firmware/CMSIS/core" -I"/home/simon/Documents/Quadcopter/Firmware/inc/FreeRTOS" -O0 -g3 -Wall -fmessage-length=0 -ffunction-sections -c -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
+	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DSTM32 -DSTM32F4 -DSTM32F401RBTx -DDEBUG -DSTM32F401xx -DUSE_STDPERIPH_DRIVER -I"/home/simon/Documents/Quadcopter/Firmware/StdPeriph_Driver/inc" -I"/home/simon/Documents/Quadcopter/Firmware/inc" -I"/home/simon/Documents/Quadcopter/Firmware/CMSIS/device" -I"/home/simon/Documents/Quadcopter/Firmware/CMSIS/core" -I"/home/simon/Documents/Quadcopter/Firmware/inc/FreeRTOS" -O0 -g3 -Wall -fmessage-length=0 -ffunction-sections -c -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

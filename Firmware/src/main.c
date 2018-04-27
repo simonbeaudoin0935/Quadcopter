@@ -8,91 +8,29 @@
   ******************************************************************************
 */
 
-
-
 #include "FreeRTOS.h"
+#include "Tasks/Task_FlashHeartbeatLED.h"
+#include "Tasks/Task_Idle.h"
+
 #include "task.h"
 
 #include "stm32f4xx.h"
 
+#include "UART/UART2.h"
 
-/* Task to be created. */
 
-void vIdleTask(void * pvParameters)
-{
-
-	while(1);
-}
-
-void vTaskCode( void * pvParameters )
-{
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
-
-	GPIO_InitTypeDef GPIO_InitStruct;
-	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
-	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
-	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;
-	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;
-	GPIO_Init(GPIOD, &GPIO_InitStruct);
-
-	GPIO_SetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15 );
-
-    while(1)
-    {
-    	GPIO_ToggleBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15 );
-        vTaskDelay(1000);
-    }
-}
-
-/* Function that creates a task. */
-void vCreateIdleTask(void)
-{
-	BaseType_t xReturned;
-	TaskHandle_t xHandle = NULL;
-
-	    /* Create the task, storing the handle. */
-	    xReturned = xTaskCreate(
-	    				vIdleTask,       /* Function that implements the task. */
-	                    "IDLE",          /* Text name for the task. */
-						configMINIMAL_STACK_SIZE,      /* Stack size in words, not bytes. */
-	                    ( void * ) 1,    /* Parameter passed into the task. */
-	                    tskIDLE_PRIORITY,/* Priority at which the task is created. */
-	                    &xHandle );      /* Used to pass out the created task's handle. */
-
-	    if( xReturned == pdPASS )
-	    {
-	        /* The task was created.  Use the task's handle to delete the task. */
-	        vTaskDelete( xHandle );
-	    }
-}
-void vOtherFunction( void )
-{
-BaseType_t xReturned;
-TaskHandle_t xHandle = NULL;
-
-    /* Create the task, storing the handle. */
-    xReturned = xTaskCreate(
-                    vTaskCode,       /* Function that implements the task. */
-                    "NAME",          /* Text name for the task. */
-					512,      /* Stack size in words, not bytes. */
-                    ( void * ) 1,    /* Parameter passed into the task. */
-					configMAX_PRIORITIES-1,/* Priority at which the task is created. */
-                    &xHandle );      /* Used to pass out the created task's handle. */
-
-    if( xReturned != pdPASS )
-    {
-        /* The task was created.  Use the task's handle to delete the task. */
-        vTaskDelete( xHandle );
-    }
-}
 
 int main(void)
 {
 
 
-	vOtherFunction();
-	//vCreateIdleTask();
+
+	//UART2_init(115200);
+
+
+	TaskHandle_t handle;
+	handle = vCreateTask_FlashHeartbeatLED();
+	handle = vCreateTask_Idle();
 
 	vTaskStartScheduler();
 
