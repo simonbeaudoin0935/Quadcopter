@@ -8,29 +8,31 @@
   ******************************************************************************
 */
 
+#include <UART/UART1.h>
 #include "FreeRTOS.h"
 #include "Tasks/Task_FlashHeartbeatLED.h"
 #include "Tasks/Task_Idle.h"
+#include "Tasks/Task_RPIReception.h"
 
 #include "task.h"
 
 #include "stm32f4xx.h"
 
-#include "UART/UART2.h"
 
-
+TaskHandle_t RPIReception_TaskHandle;
 
 int main(void)
 {
 
 
 
-	//UART2_init(115200);
+
 
 
 	TaskHandle_t handle;
 	handle = vCreateTask_FlashHeartbeatLED();
 	handle = vCreateTask_Idle();
+	RPIReception_TaskHandle = vCreateTask_RPIReception();
 
 	vTaskStartScheduler();
 
