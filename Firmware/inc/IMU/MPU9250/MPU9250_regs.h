@@ -1,25 +1,12 @@
 /*
- * MPU9250.h
+ * MPU9250_regs.h
  *
- *  Created on: Apr 27, 2018
+ *  Created on: Apr 28, 2018
  *      Author: simon
  */
 
-#ifndef MEMS_MPU9250_H_
-#define MEMS_MPU9250_H_
-
-#include "stm32f4xx.h"
-
-#define MPU_select   GPIOC->BSRRH = GPIO_Pin_11;
-#define MPU_deselect GPIOC->BSRRL = GPIO_Pin_11;
-
-void MPU_init(void);
-
-
-uint8_t MPU_WriteReg(uint8_t WriteAddr, uint8_t WriteData );
-uint8_t MPU_ReadReg(uint8_t ReadAddr);
-void MPU_ReadRegs(uint8_t ReadAddr, uint8_t *ReadBuf, unsigned int Bytes );
-uint8_t MPU_whoami();
+#ifndef IMU_MPU9250_REGS_H_
+#define IMU_MPU9250_REGS_H_
 
 // mpu9250 registers
 #define MPUREG_XG_OFFS_TC 0x00
@@ -212,4 +199,4 @@ uint8_t MPU_whoami();
 
 #define MPU9250T_85degC   ((float)0.002995177763f) // 0.002995177763 degC/LSB
 
-#endif /* MEMS_MPU9250_H_ */
+#endif /* IMU_MPU9250_REGS_H_ */

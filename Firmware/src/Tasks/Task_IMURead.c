@@ -1,6 +1,6 @@
 #include "Tasks/Task_IMURead.h"
 #include "SPI/SPI1.h"
-#include "MEMS/MPU9250.h"
+#include "IMU/MPU9250/MPU9250.h"
 #include "UART/UART6.h"
 
 static void vTask_IMURead( void * pvParameters )

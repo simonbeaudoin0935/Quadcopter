@@ -12,7 +12,8 @@ RM := rm -rf
 -include src/UART/subdir.mk
 -include src/Tasks/subdir.mk
 -include src/SPI/subdir.mk
--include src/MEMS/subdir.mk
+-include src/IMU/MPU9250/subdir.mk
+-include src/IMU/LSM9DS1/subdir.mk
 -include src/FreeRTOS/subdir.mk
 -include src/subdir.mk
 -include StdPeriph_Driver/src/subdir.mk

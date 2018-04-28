@@ -17,7 +17,8 @@ C_DEPS :=
 SUBDIRS := \
 StdPeriph_Driver/src \
 src/FreeRTOS \
-src/MEMS \
+src/IMU/LSM9DS1 \
+src/IMU/MPU9250 \
 src/SPI \
 src/Tasks \
 src/UART \
