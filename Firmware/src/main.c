@@ -1,27 +1,33 @@
 
 #include "FreeRTOS.h"
 #include "Tasks/Task_FlashHeartbeatLED.h"
-#include "Tasks/Task_Idle.h"
 #include "Tasks/Task_RPIReception.h"
 #include "Tasks/Task_PIDLoop.h"
+#include "Tasks/Task_IMURead.h"
 
+#include "semphr.h"
 
 #include "stm32f4xx.h"
 
 struct{
-	TaskHandle_t TaskHandle_Idle;
 	TaskHandle_t TaskHandle_FlashHeartbeatLED;
 	TaskHandle_t TaskHandle_RPIReception;
 	TaskHandle_t TaskHandle_PIDLoop;
+	TaskHandle_t TaskHandle_IMURead;
 }TaskHandles;
 
+SemaphoreHandle_t xUART1Semphr;
 
 int main(void)
 {
+	NVIC_SetPriorityGrouping( 0 );
+
+	xUART1Semphr =  xSemaphoreCreateMutex();
+
 	TaskHandles.TaskHandle_FlashHeartbeatLED = vCreateTask_FlashHeartbeatLED();
-	TaskHandles.TaskHandle_Idle = vCreateTask_Idle();
 	TaskHandles.TaskHandle_RPIReception = vCreateTask_RPIReception();
 	TaskHandles.TaskHandle_PIDLoop = vCreateTask_PIDLoop();
+	TaskHandles.TaskHandle_IMURead = vCreateTask_IMURead();
 
 
 	vTaskStartScheduler();
@@ -70,5 +76,10 @@ void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName )
 	configCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2.  This hook
 	function is called if a stack overflow is detected. */
 	taskDISABLE_INTERRUPTS();
-	for( ;; );
+
+
+	for( ;; ){
+		GPIO_ToggleBits(GPIOC, GPIO_Pin_13);
+		for(int i = 0; i != 75000; i++);
+	}
 }

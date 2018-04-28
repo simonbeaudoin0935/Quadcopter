@@ -68,15 +68,14 @@ void UART1_init(unsigned int p_baud_rate){
   USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
   
 
-//Initialiser le NVIC pour activer l'interruption du USART2
-  NVIC_InitTypeDef NVIC_InitStruct;
-  NVIC_InitStruct.NVIC_IRQChannel = USART1_IRQn;
-  NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
-  NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 1;
-  NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0;
+//Initialiser le NVIC pour activer l'interruption du USART1
 
-  NVIC_Init(&NVIC_InitStruct);
+
+
   
+  NVIC_SetPriority(USART1_IRQn, 6);
+  NVIC_EnableIRQ(USART1_IRQn);
+
 
 }
 
