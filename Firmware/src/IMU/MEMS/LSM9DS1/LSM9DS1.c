@@ -1,5 +1,5 @@
 #include "IMU/LSM9DS1/LSM9DS1.h"
-#include "SPI/SPI1.h"
+#include "COM/SPI/SPI1.h"
 #include "FreeRTOS.h"
 #include "task.h"
 
@@ -17,8 +17,13 @@ static uint8_t LSM_M_WriteReg(uint8_t WriteAddr, uint8_t WriteData );
 static uint8_t LSM_M_ReadReg(uint8_t ReadAddr);
 static void    LSM_M_ReadRegs(uint8_t ReadAddr, uint8_t *ReadBuf, unsigned int Bytes );
 
-static float gyro_divider = 8.75 * 1000;
-static float acc_divider  = 16.3934 * 1000;
+static float gyro_multiplier = 0.00875;
+static float acc_multiplier  = 0.000061;
+static float mag_multiplier  = 0.00014;
+
+static float acc_bias[3] = {0.0, -0.11, 0.2};
+static float gyr_bias[3] = {-5.75, 5.0, -0.75};
+static float mag_bias[3] = {0.0, 0.0, 0.0};
 
 void LSM_init(void){
 
@@ -39,9 +44,9 @@ void LSM_init(void){
 	LSM_M_DESELECT;
 
 
-#define LSM_AG_InitRegNum 23
-#define CTL1 (GYRO_ODR_952HZ | GYRO_SCALE_245DPS | GYRO_BANDWIDTH_4)
-#define CTL6 (ACC_ODR_50HZ | ACC_SCALE_2G | 0x00)
+	#define LSM_AG_InitRegNum 23
+	#define CTL1 (GYRO_ODR_952HZ | GYRO_SCALE_245DPS | GYRO_BANDWIDTH_4)
+	#define CTL6 (ACC_ODR_50HZ | ACC_SCALE_2G | 0x00)
 
 	int8_t LSM_AG_Init_Data[LSM_AG_InitRegNum][2] = {
 
@@ -75,6 +80,14 @@ void LSM_init(void){
 	    LSM_AG_WriteReg(LSM_AG_Init_Data[i][1], LSM_AG_Init_Data[i][0]);
 	    vTaskDelay(1);  // I2C must slow down the write speed, otherwise it won't work
 	}
+
+	LSM_M_WriteReg(CTRL_REG2_M, 0x0C);
+	vTaskDelay(1);
+	LSM_M_WriteReg(CTRL_REG3_M, 0x84);
+	LSM_M_WriteReg(CTRL_REG1_M, 0xFC);
+
+	LSM_M_WriteReg(CTRL_REG4_M, 0x0C);
+
 }
 
 /////////////////////////////////////////
@@ -179,7 +192,7 @@ uint8_t LSM_AG_read_fifo_status(void){
 
 
 
-void LSM_read_gyro(float gyro_data[3]){
+void LSM_read_gyr(float gyro_data[3]){
     uint8_t response[6];
     int16_t bit_data;
     float data;
@@ -190,25 +203,71 @@ void LSM_read_gyro(float gyro_data[3]){
     for(i = 0; i < 3; i++) {
         bit_data = ((int16_t)response[i*2+1]<<8) | response[i*2];
         data = (float)bit_data;
-        gyro_data[i] = data/gyro_divider;// - gyro_bias[i];
+        gyro_data[i] = data * gyro_multiplier - gyr_bias[i];
     }
 }
 
 void LSM_read_acc(float acc_data[3]){
     uint8_t response[6];
-    int16_t bit_data;
-    float data;
-    int i;
 
     LSM_AG_ReadRegs(OUT_X_L_XL,response,6);
 
-    for(i = 0; i < 3; i++) {
-        bit_data = ((int16_t)response[i*2+1]<<8) | response[i*2];
-        data = (float)bit_data;
-        acc_data[i] = data/acc_divider;// - gyro_bias[i];
-    }
+
+    acc_data[0] = (float)((int16_t)((response[1]<<8) + response[0])) * acc_multiplier - acc_bias[0];
+    acc_data[1] = (float)((int16_t)((response[3]<<8) + response[2])) * acc_multiplier - acc_bias[1];
+    acc_data[2] = -((float)((int16_t)((response[5]<<8) + response[4])) * acc_multiplier - acc_bias[2]);
+}
+
+void LSM_read_mag(float mag_data[3]){
+    uint8_t response[6];
+
+    LSM_M_ReadRegs(OUT_X_L_M,response,6);
+
+    mag_data[0] = (float)((int16_t)((response[1]<<8) + response[0])) * mag_multiplier - mag_bias[0];
+    mag_data[1] = (float)((int16_t)((response[3]<<8) + response[2])) * mag_multiplier - mag_bias[1];
+    mag_data[2] = (float)((int16_t)((response[5]<<8) + response[4])) * mag_multiplier - mag_bias[2];
 }
 
 uint8_t LSM_M_whoami(void){
 	return LSM_M_ReadReg(WHO_AM_I_M);
+}
+
+
+void LSM_acc_cal(void){
+	float data[3];
+
+	acc_bias[0] = 0.0;
+	acc_bias[1] = 0.0;
+	acc_bias[2] = 0.0;
+
+
+
+	for(int i = 0; i != 2000; i ++){
+		LSM_read_acc(data);
+
+		acc_bias[0] += data[0]/2000.0;
+		acc_bias[1] += data[1]/2000.0;
+		acc_bias[2] += data[2]/2000.0;
+		vTaskDelay(1);
+	}
+
+	acc_bias[2] += 1.0;
+}
+void LSM_gyr_cal(void){
+	float data[3];
+
+	gyr_bias[0] = 0.0;
+	gyr_bias[1] = 0.0;
+	gyr_bias[2] = 0.0;
+
+
+
+	for(int i = 0; i != 2000; i ++){
+		LSM_read_gyr(data);
+
+		gyr_bias[0] += data[0]/2000.0;
+		gyr_bias[1] += data[1]/2000.0;
+		gyr_bias[2] += data[2]/2000.0;
+		vTaskDelay(1);
+	}
 }

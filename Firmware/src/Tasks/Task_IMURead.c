@@ -1,48 +1,80 @@
 #include "Tasks/Task_IMURead.h"
-#include "SPI/SPI1.h"
-#include "I2C/I2C1.h"
-#include "I2C/tm_stm32f4_i2c.h"
+#include "COM/SPI/SPI1.h"
+
 #include "IMU/MPU9250/MPU9250.h"
 #include "IMU/LSM9DS1/LSM9DS1.h"
-#include "IMU/ADA9DOF/ADA9DOF.h"
-#include "UART/UART6.h"
+
+#include "COM/UART/UART6.h"
 #include "stdio.h"
 
+#include "IMU/Madgwick/madgwick.h"
 
+
+static float mpu_gyr_data[3];
+static float mpu_acc_data[3];
+static float mpu_mag_data[3];
+
+
+
+static float lsm_gyr_data[3];
+static float lsm_acc_data[3];
+static float lsm_mag_data[3];
 
 
 static void vTask_IMURead( void * pvParameters )
 {
-	SPI1_init();
-	//I2C1_init();
-	///TM_I2C_Init(I2C1, 400000);
-	//ADA_init();
+
+
+   	SPI1_init();
 	MPU_init();
 	LSM_init();
+	Madgwick_init(50,1);
 
 	UART6_init(115200);
 
+	//MPU_acc_cal();
+	//MPU_gyr_cal();
+
+	//LSM_acc_cal();
+	//LSM_gyr_cal();
+
+
     while(1)
     {
-    	float data[3];
-//    	uint8_t data = TM_I2C_Read(I2C1, I2C_ADDR_GYROSCOPE, GYRO_REGISTER_WHO_AM_I);
-//    	UART6_write(data);
-//
 
-    	//ADA_gyro_read(gyro_data);
-    	//MPU_read_acc(mpu_gyro_data);
 
-    	LSM_read_gyro(data);
+
+    	MPU_read_gyro(mpu_gyr_data);
+    	MPU_read_acc(mpu_acc_data);
+
+    	LSM_read_gyr(lsm_gyr_data);
+    	LSM_read_acc(lsm_acc_data);
+    	LSM_read_mag(lsm_mag_data);
+
+    	Madgwick_compute(mpu_gyr_data[0],
+    					 mpu_gyr_data[1],
+						 mpu_gyr_data[2],
+    				     mpu_acc_data[0],
+    			         mpu_acc_data[1],
+						 mpu_acc_data[2],
+						 0.0,
+						 0.0,
+						 0.0);
+
+    	float roll,pitch,yaw;
+    	computeAngles(&roll,&pitch,&yaw);
 
     	UART6_write('#');
     	UART6_write(0x01);
     	UART6_write(24);
-    	UART6_writeFloatUnion(0);
-    	UART6_writeFloatUnion(0);
-    	UART6_writeFloatUnion(0);
-    	UART6_writeFloatUnion(data[0]);
-    	UART6_writeFloatUnion(data[1]);
-    	UART6_writeFloatUnion(data[2]);
+
+     	UART6_writeFloatUnion(0);
+       	UART6_writeFloatUnion(0);
+        UART6_writeFloatUnion(0);
+    	UART6_writeFloatUnion(roll);
+    	UART6_writeFloatUnion(pitch);
+    	UART6_writeFloatUnion(yaw);
+
     	UART6_write('.');
 
 

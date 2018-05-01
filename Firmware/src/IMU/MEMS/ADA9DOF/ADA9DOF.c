@@ -1,4 +1,4 @@
-#include "I2C/tm_stm32f4_i2c.h"
+#include "COM/I2C/tm_stm32f4_i2c.h"
 #include "IMU/ADA9DOF/ADA9DOF.h"
 
 

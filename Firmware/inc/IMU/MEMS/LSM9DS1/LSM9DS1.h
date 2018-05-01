@@ -25,12 +25,16 @@ uint8_t LSM_AG_read_status_2(void);
 
 uint8_t LSM_AG_read_fifo_status(void);
 
-void LSM_read_gyro(float gyro_data[3]);
+void LSM_read_gyr(float gyr_data[3]);
 
 void LSM_read_acc(float acc_data[3]);
 
-void LSM_read_mag(float acc_data[3]);
+void LSM_read_mag(float mag_data[3]);
 
 uint8_t LSM_M_whoami(void);
+
+void LSM_acc_cal(void);
+
+void LSM_gyr_cal(void);
 
 #endif /* IMU_LSM9DS1_LSM9DS1_H_ */

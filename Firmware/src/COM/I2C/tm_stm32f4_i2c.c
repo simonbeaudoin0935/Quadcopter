@@ -16,7 +16,7 @@
  * | along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * |----------------------------------------------------------------------
  */
-#include "I2C/tm_stm32f4_i2c.h"
+#include "COM/I2C/tm_stm32f4_i2c.h"
 
 /* Private variables */
 static uint32_t TM_I2C_Timeout;

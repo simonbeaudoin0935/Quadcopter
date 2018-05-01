@@ -2,7 +2,7 @@
 #include "stm32f4xx.h"
 #include "Mavlink/common/mavlink.h"
 #include "semphr.h"
-#include "UART/UART1.h"
+#include "COM/UART/UART1.h"
 
 void vTask_FlashHeartbeatLED(void * pvParameters);
 

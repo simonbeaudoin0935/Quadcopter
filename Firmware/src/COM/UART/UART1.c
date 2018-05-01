@@ -1,4 +1,4 @@
-#include "UART/UART1.h"
+#include "COM/UART/UART1.h"
 #include "stm32f4xx.h"
 #include "FreeRTOS.h"
 #include "task.h"

@@ -5,7 +5,7 @@
  *      Author: simon
  */
 #include "Tasks/Task_RPIReception.h"
-#include "UART/UART1.h"
+#include "COM/UART/UART1.h"
 #include "Mavlink/common/mavlink.h"
 
 void vTask_RPIReception(void * pvParameters);

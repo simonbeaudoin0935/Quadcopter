@@ -16,14 +16,15 @@ C_DEPS :=
 # Every subdirectory with source files must be described here
 SUBDIRS := \
 StdPeriph_Driver/src \
+src/COM/I2C \
+src/COM/SPI \
+src/COM/UART \
 src/FreeRTOS \
-src/I2C \
 src/IMU/ADA9DOF \
 src/IMU/LSM9DS1 \
 src/IMU/MPU9250 \
-src/SPI \
+src/IMU/Madgwick \
 src/Tasks \
-src/UART \
 src \
 startup \
 

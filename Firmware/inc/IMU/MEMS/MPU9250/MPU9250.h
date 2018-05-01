@@ -29,6 +29,9 @@ unsigned int MPU_set_gyro_scale(int scale);
 void MPU_read_acc(float acc_data[3]);
 void MPU_read_gyro(float gyro_data[3]);
 
+void MPU_acc_cal(void);
+void MPU_gyr_cal(void);
+
 
 
 #endif /* MEMS_MPU9250_H_ */

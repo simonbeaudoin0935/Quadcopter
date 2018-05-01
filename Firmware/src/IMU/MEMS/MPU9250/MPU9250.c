@@ -1,11 +1,11 @@
 #include "IMU/MPU9250/MPU9250.h"
-#include "SPI/SPI1.h"
+#include "COM/SPI/SPI1.h"
 #include "FreeRTOS.h"
 #include "task.h"
 
-float acc_divider, gyro_divider;
-float acc_bias[3] = {0.0, 0.0, 0.0};
-float gyro_bias[3] = {0.0, 0.0, 0.0};
+static float acc_divider, gyro_divider;
+static float acc_bias[3] = {-0.08, 0.0, -0.09};
+static float gyr_bias[3] = {1.0, -1.6, -0.6};
 
 void MPU_init(void){
 
@@ -219,16 +219,48 @@ void MPU_read_gyro(float gyro_data[3])
     for(i = 0; i < 3; i++) {
         bit_data = ((int16_t)response[i*2]<<8) | response[i*2+1];
         data = (float)bit_data;
-        gyro_data[i] = data/gyro_divider;// - gyro_bias[i];
+        gyro_data[i] = data/gyro_divider - gyr_bias[i];
     }
-//	uint8_t xl = MPU_ReadReg(MPUREG_GYRO_XOUT_L);
-//	uint8_t xh = MPU_ReadReg(MPUREG_GYRO_XOUT_H);
-//	uint8_t yl = MPU_ReadReg(MPUREG_GYRO_YOUT_L);
-//	uint8_t yh = MPU_ReadReg(MPUREG_GYRO_YOUT_H);
-//	uint8_t zl = MPU_ReadReg(MPUREG_GYRO_ZOUT_L);
-//	uint8_t zh = MPU_ReadReg(MPUREG_GYRO_ZOUT_H);
-//
-//	gyro_data[0] = ((float) ((int16_t)(xh << 8 | xl))) / gyro_divider;
-//	gyro_data[1] = ((float) ((int16_t)(yh << 8 | yl))) / gyro_divider;
-//	gyro_data[2] = ((float) ((int16_t)(zh << 8 | zl))) / gyro_divider;
+
+}
+
+
+
+void MPU_acc_cal(void){
+	float data[3];
+
+	acc_bias[0] = 0.0;
+	acc_bias[1] = 0.0;
+	acc_bias[2] = 0.0;
+
+
+
+	for(int i = 0; i != 2000; i ++){
+		MPU_read_acc(data);
+
+		acc_bias[0] += data[0]/2000.0;
+		acc_bias[1] += data[1]/2000.0;
+		acc_bias[2] += data[2]/2000.0;
+		vTaskDelay(1);
+	}
+
+	acc_bias[2] -= 1.0;
+}
+void MPU_gyr_cal(void){
+	float data[3];
+
+	gyr_bias[0] = 0.0;
+	gyr_bias[1] = 0.0;
+	gyr_bias[2] = 0.0;
+
+
+
+	for(int i = 0; i != 10000; i ++){
+		MPU_read_gyro(data);
+
+		gyr_bias[0] += data[0]/10000.0;
+		gyr_bias[1] += data[1]/10000.0;
+		gyr_bias[2] += data[2]/10000.0;
+		vTaskDelay(1);
+	}
 }

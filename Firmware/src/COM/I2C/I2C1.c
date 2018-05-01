@@ -1,4 +1,4 @@
-#include "I2C/I2C1.h"
+#include "COM/I2C/I2C1.h"
 #include "stm32f4xx.h"
 
 typedef enum{
