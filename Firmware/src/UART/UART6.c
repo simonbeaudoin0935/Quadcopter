@@ -60,14 +60,8 @@ void UART6_init(unsigned int p_baud_rate){
   USART_ITConfig(USART6, USART_IT_TXE, ENABLE);
   
 
-//Initialiser le NVIC pour activer l'interruption du USART2
-  NVIC_InitTypeDef NVIC_InitStruct;
-  NVIC_InitStruct.NVIC_IRQChannel = USART6_IRQn;
-  NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
-  NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 1;
-  NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0;
-
-  NVIC_Init(&NVIC_InitStruct);
+  NVIC_SetPriority(USART6_IRQn, 6);
+  NVIC_EnableIRQ(USART6_IRQn);
   
 
 }
@@ -134,7 +128,12 @@ void UART6_print(char* p_string)
 
 void UART6_writeFloatUnion(float p_float)
 {
-	floatUnion_t v_floatUnion;
+
+	union{
+		float floating;
+		char  bytes[sizeof(float)];
+	}v_floatUnion;
+
 
 	v_floatUnion.floating = p_float;
 
@@ -145,7 +144,10 @@ void UART6_writeFloatUnion(float p_float)
 }
 void UART6_writeIntegerUnion(int p_integer)
 {
-	intUnion_t v_intUnion;
+    union{
+		int integer;
+		char bytes[sizeof(int)];
+	}v_intUnion;
 
 	v_intUnion.integer = p_integer;
 

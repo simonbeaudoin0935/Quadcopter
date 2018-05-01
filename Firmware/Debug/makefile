@@ -14,6 +14,8 @@ RM := rm -rf
 -include src/SPI/subdir.mk
 -include src/IMU/MPU9250/subdir.mk
 -include src/IMU/LSM9DS1/subdir.mk
+-include src/IMU/ADA9DOF/subdir.mk
+-include src/I2C/subdir.mk
 -include src/FreeRTOS/subdir.mk
 -include src/subdir.mk
 -include StdPeriph_Driver/src/subdir.mk

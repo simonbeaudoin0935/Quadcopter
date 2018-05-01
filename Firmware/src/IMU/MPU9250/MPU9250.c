@@ -191,16 +191,12 @@ unsigned int MPU_set_gyro_scale(int scale){
 void MPU_read_acc(float acc_data[3])
 {
     uint8_t response[6];
-    int16_t bit_data;
-    float data;
-    int i;
-    MPU_ReadRegs(MPUREG_ACCEL_XOUT_H,response,6);
-    for(i = 0; i < 3; i++) {
-        bit_data = ((int16_t)response[i*2]<<8)|response[i*2+1];
-        data = (float)bit_data;
-        acc_data[i] = data/acc_divider - acc_bias[i];
-    }
 
+    MPU_ReadRegs(MPUREG_ACCEL_XOUT_H,response,6);
+
+    acc_data[0] = (float)((int16_t)((response[0]<<8) + response[1])) / acc_divider - acc_bias[0];
+    acc_data[1] = (float)((int16_t)((response[2]<<8) + response[3])) / acc_divider - acc_bias[1];
+    acc_data[2] = (float)((int16_t)((response[4]<<8) + response[5])) / acc_divider - acc_bias[2];
 }
 
 
@@ -217,11 +213,22 @@ void MPU_read_gyro(float gyro_data[3])
     int16_t bit_data;
     float data;
     int i;
+
     MPU_ReadRegs(MPUREG_GYRO_XOUT_H,response,6);
+
     for(i = 0; i < 3; i++) {
         bit_data = ((int16_t)response[i*2]<<8) | response[i*2+1];
         data = (float)bit_data;
-        gyro_data[i] = data/gyro_divider - gyro_bias[i];
+        gyro_data[i] = data/gyro_divider;// - gyro_bias[i];
     }
-
+//	uint8_t xl = MPU_ReadReg(MPUREG_GYRO_XOUT_L);
+//	uint8_t xh = MPU_ReadReg(MPUREG_GYRO_XOUT_H);
+//	uint8_t yl = MPU_ReadReg(MPUREG_GYRO_YOUT_L);
+//	uint8_t yh = MPU_ReadReg(MPUREG_GYRO_YOUT_H);
+//	uint8_t zl = MPU_ReadReg(MPUREG_GYRO_ZOUT_L);
+//	uint8_t zh = MPU_ReadReg(MPUREG_GYRO_ZOUT_H);
+//
+//	gyro_data[0] = ((float) ((int16_t)(xh << 8 | xl))) / gyro_divider;
+//	gyro_data[1] = ((float) ((int16_t)(yh << 8 | yl))) / gyro_divider;
+//	gyro_data[2] = ((float) ((int16_t)(zh << 8 | zl))) / gyro_divider;
 }
