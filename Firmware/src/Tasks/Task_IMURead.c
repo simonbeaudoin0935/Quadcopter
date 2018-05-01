@@ -1,8 +1,10 @@
 #include "Tasks/Task_IMURead.h"
 #include "COM/SPI/SPI1.h"
+#include "COM/I2C/I2C1.h"
 
-#include "IMU/MPU9250/MPU9250.h"
-#include "IMU/LSM9DS1/LSM9DS1.h"
+#include "IMU/MEMS/MPU9250/MPU9250.h"
+#include "IMU/MEMS/LSM9DS1/LSM9DS1.h"
+#include "IMU/MEMS/ADA9DOF/ADA9DOF.h"
 
 #include "COM/UART/UART6.h"
 #include "stdio.h"
@@ -20,14 +22,20 @@ static float lsm_gyr_data[3];
 static float lsm_acc_data[3];
 static float lsm_mag_data[3];
 
+static float ada_gyr_data[3];
+static float ada_acc_data[3];
+static float ada_mag_data[3];
 
 static void vTask_IMURead( void * pvParameters )
 {
 
 
    	SPI1_init();
+   	I2C1_init();
 	MPU_init();
 	LSM_init();
+	ADA_init();
+
 	Madgwick_init(50,1);
 
 	UART6_init(115200);
@@ -44,12 +52,16 @@ static void vTask_IMURead( void * pvParameters )
 
 
 
-    	MPU_read_gyro(mpu_gyr_data);
+    	MPU_read_gyr(mpu_gyr_data);
     	MPU_read_acc(mpu_acc_data);
+    	MPU_read_mag(mpu_mag_data);
+//
+//    	LSM_read_gyr(lsm_gyr_data);
+//    	LSM_read_acc(lsm_acc_data);
+//    	LSM_read_mag(lsm_mag_data);
 
-    	LSM_read_gyr(lsm_gyr_data);
-    	LSM_read_acc(lsm_acc_data);
-    	LSM_read_mag(lsm_mag_data);
+//    	ADA_gyro_read(ada_gyr_data);
+//    	ADA_acc_read(ada_acc_data);
 
     	Madgwick_compute(mpu_gyr_data[0],
     					 mpu_gyr_data[1],
@@ -57,23 +69,26 @@ static void vTask_IMURead( void * pvParameters )
     				     mpu_acc_data[0],
     			         mpu_acc_data[1],
 						 mpu_acc_data[2],
-						 0.0,
-						 0.0,
-						 0.0);
+						 mpu_mag_data[0],
+						 mpu_mag_data[1],
+						 mpu_mag_data[2]);
 
     	float roll,pitch,yaw;
     	computeAngles(&roll,&pitch,&yaw);
+
 
     	UART6_write('#');
     	UART6_write(0x01);
     	UART6_write(24);
 
-     	UART6_writeFloatUnion(0);
-       	UART6_writeFloatUnion(0);
-        UART6_writeFloatUnion(0);
     	UART6_writeFloatUnion(roll);
     	UART6_writeFloatUnion(pitch);
     	UART6_writeFloatUnion(yaw);
+
+     	UART6_writeFloatUnion(0);
+       	UART6_writeFloatUnion(0);
+        UART6_writeFloatUnion(0);
+
 
     	UART6_write('.');
 
@@ -82,7 +97,7 @@ static void vTask_IMURead( void * pvParameters )
 
 
 
-        vTaskDelay(50);
+        vTaskDelay(20);
     }
 }
 

@@ -11,9 +11,9 @@ RM := rm -rf
 -include startup/subdir.mk
 -include src/Tasks/subdir.mk
 -include src/IMU/Madgwick/subdir.mk
--include src/IMU/MPU9250/subdir.mk
--include src/IMU/LSM9DS1/subdir.mk
--include src/IMU/ADA9DOF/subdir.mk
+-include src/IMU/MEMS/MPU9250/subdir.mk
+-include src/IMU/MEMS/LSM9DS1/subdir.mk
+-include src/IMU/MEMS/ADA9DOF/subdir.mk
 -include src/FreeRTOS/subdir.mk
 -include src/COM/UART/subdir.mk
 -include src/COM/SPI/subdir.mk

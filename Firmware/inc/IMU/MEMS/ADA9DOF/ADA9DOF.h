@@ -21,5 +21,6 @@
 
 void ADA_init(void);
 void ADA_gyro_read(float data[3]);
+void ADA_acc_read(float data[3]);
 
 #endif /* IMU_ADA9DOF_ADA9DOF_H_ */

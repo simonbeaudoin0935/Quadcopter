@@ -1,11 +1,21 @@
-#include "IMU/MPU9250/MPU9250.h"
+#include "IMU/MEMS/MPU9250/MPU9250.h"
 #include "COM/SPI/SPI1.h"
 #include "FreeRTOS.h"
 #include "task.h"
 
-static float acc_divider, gyro_divider;
+#define MPU_select   GPIOC->BSRRH = GPIO_Pin_11;
+#define MPU_deselect GPIOC->BSRRL = GPIO_Pin_11;
+
+static float acc_divider, gyr_divider, mag_divider = 1.0;
+
 static float acc_bias[3] = {-0.08, 0.0, -0.09};
 static float gyr_bias[3] = {1.0, -1.6, -0.6};
+static float mag_bias[3] = {0.0, 0.0, 0.0};
+
+
+static uint8_t MPU_WriteReg(uint8_t WriteAddr, uint8_t WriteData );
+static uint8_t MPU_ReadReg(uint8_t ReadAddr);
+static void    MPU_ReadRegs(uint8_t ReadAddr, uint8_t *ReadBuf, unsigned int Bytes );
 
 void MPU_init(void){
 
@@ -24,11 +34,11 @@ void MPU_init(void){
 #define MPU_InitRegNum 17
 
 
-	uint8_t lpf_gyro = BITS_DLPF_CFG_188HZ;
-	uint8_t lpf_acc  = BITS_DLPF_CFG_188HZ;
+	uint8_t lpf_gyro = BITS_DLPF_CFG_5HZ;
+	uint8_t lpf_acc  = BITS_DLPF_CFG_5HZ;
 
 	int8_t MPU_Init_Data[MPU_InitRegNum][2] = {
-		{BIT_H_RESET, MPUREG_PWR_MGMT_1},        // Reset Device
+		{0x80, MPUREG_PWR_MGMT_1},               // Reset Device
 	    {0x01, MPUREG_PWR_MGMT_1},               // Clock Source
 	    {0x00, MPUREG_PWR_MGMT_2},               // Enable Acc & Gyro
 	    {lpf_gyro, MPUREG_CONFIG},               // Use DLPF set Gyroscope bandwidth 184Hz, temperature bandwidth 188Hz
@@ -50,11 +60,7 @@ void MPU_init(void){
 	    {0x81, MPUREG_I2C_SLV0_CTRL},            // Enable I2C and set 1 byte
 
 	    {AK8963_CNTL1, MPUREG_I2C_SLV0_REG},     // I2C slave 0 register address from where to begin data transfer
-	#ifdef AK8963FASTMODE
 	    {0x16, MPUREG_I2C_SLV0_DO},              // Register value to 100Hz continuous measurement in 16bit
-	#else
-	    {0x12, MPUREG_I2C_SLV0_DO},              // Register value to 8Hz continuous measurement in 16bit
-	#endif
 	    {0x81, MPUREG_I2C_SLV0_CTRL}             //Enable I2C and set 1 byte
 	};
 
@@ -98,6 +104,21 @@ void MPU_ReadRegs(uint8_t ReadAddr, uint8_t *ReadBuf, unsigned int Bytes ){
 uint8_t MPU_whoami(){
 
 	return MPU_WriteReg(MPUREG_WHOAMI|READ_FLAG, 0x00);
+}
+
+uint8_t MPU_AK8963_whoami(){
+    uint8_t response;
+    MPU_WriteReg(MPUREG_I2C_SLV0_ADDR,AK8963_I2C_ADDR|READ_FLAG); //Set the I2C slave addres of AK8963 and set for read.
+    MPU_WriteReg(MPUREG_I2C_SLV0_REG, AK8963_WIA); //I2C slave 0 register address from where to begin data transfer
+    MPU_WriteReg(MPUREG_I2C_SLV0_CTRL, 0x81); //Read 1 byte from the magnetometer
+
+    //WriteReg(MPUREG_I2C_SLV0_CTRL, 0x81);    //Enable I2C and set bytes
+    vTaskDelay(1);
+    response = MPU_WriteReg(MPUREG_EXT_SENS_DATA_00|READ_FLAG, 0x00);    //Read I2C
+    //ReadRegs(MPUREG_EXT_SENS_DATA_00,response,1);
+    //response=WriteReg(MPUREG_I2C_SLV0_DO, 0x00);    //Read I2C
+
+    return response;
 }
 
 
@@ -164,10 +185,10 @@ unsigned int MPU_set_gyro_scale(int scale){
     MPU_WriteReg(MPUREG_GYRO_CONFIG, scale);
 
     switch (scale){
-        case BITS_FS_250DPS:   gyro_divider = 131;  break;
-        case BITS_FS_500DPS:   gyro_divider = 65.5; break;
-        case BITS_FS_1000DPS:  gyro_divider = 32.8; break;
-        case BITS_FS_2000DPS:  gyro_divider = 16.4; break;
+        case BITS_FS_250DPS:   gyr_divider = 131;  break;
+        case BITS_FS_500DPS:   gyr_divider = 65.5; break;
+        case BITS_FS_1000DPS:  gyr_divider = 32.8; break;
+        case BITS_FS_2000DPS:  gyr_divider = 16.4; break;
     }
 
     temp_scale = MPU_ReadReg(MPUREG_GYRO_CONFIG);
@@ -182,12 +203,7 @@ unsigned int MPU_set_gyro_scale(int scale){
     return temp_scale;
 }
 
-/*                                 READ ACCELEROMETER
- * usage: call this function to read accelerometer data. Axis represents selected axis:
- * 0 -> X axis
- * 1 -> Y axis
- * 2 -> Z axis
- */
+
 void MPU_read_acc(float acc_data[3])
 {
     uint8_t response[6];
@@ -199,32 +215,35 @@ void MPU_read_acc(float acc_data[3])
     acc_data[2] = (float)((int16_t)((response[4]<<8) + response[5])) / acc_divider - acc_bias[2];
 }
 
-
-/*                                 READ GYROSCOPE
- * usage: call this function to read gyroscope data. Axis represents selected axis:
- * 0 -> X axis
- * 1 -> Y axis
- * 2 -> Z axis
- */
-
-void MPU_read_gyro(float gyro_data[3])
+void MPU_read_gyr(float gyr_data[3])
 {
     uint8_t response[6];
-    int16_t bit_data;
-    float data;
-    int i;
 
     MPU_ReadRegs(MPUREG_GYRO_XOUT_H,response,6);
 
-    for(i = 0; i < 3; i++) {
-        bit_data = ((int16_t)response[i*2]<<8) | response[i*2+1];
-        data = (float)bit_data;
-        gyro_data[i] = data/gyro_divider - gyr_bias[i];
-    }
-
+    gyr_data[0] = (float)((int16_t)((response[0]<<8) + response[1])) / gyr_divider - gyr_bias[0];
+    gyr_data[1] = (float)((int16_t)((response[2]<<8) + response[3])) / gyr_divider - gyr_bias[1];
+    gyr_data[2] = (float)((int16_t)((response[4]<<8) + response[5])) / gyr_divider - gyr_bias[2];
 }
 
+void MPU_read_mag(float mag_data[3]){
 
+    uint8_t response[7];
+
+    MPU_WriteReg(MPUREG_I2C_SLV0_ADDR,AK8963_I2C_ADDR|READ_FLAG);  // Set the I2C slave addres of AK8963 and set for read.
+    MPU_WriteReg(MPUREG_I2C_SLV0_REG, AK8963_HXL);                 // I2C slave 0 register address from where to begin data transfer
+    MPU_WriteReg(MPUREG_I2C_SLV0_CTRL, 0x87);                      // Read 6 bytes from the magnetometer
+
+    for(int i = 0; i != 100000; i++);
+    MPU_ReadRegs(MPUREG_EXT_SENS_DATA_00,response,7);
+    // must start your read from AK8963A register 0x03 and read seven bytes so that upon read of ST2 register 0x09 the AK8963A will unlatch the data registers for the next measurement.
+    mag_data[0] = ((float)((int16_t)((response[1]<<8) + response[0]))) * 0.6 - mag_bias[0];
+    mag_data[1] = ((float)((int16_t)((response[3]<<8) + response[2]))) * 0.6 - mag_bias[1];
+    mag_data[2] = ((float)((int16_t)((response[5]<<8) + response[4]))) * 0.6 - mag_bias[2];
+
+
+
+}
 
 void MPU_acc_cal(void){
 	float data[3];
@@ -256,7 +275,7 @@ void MPU_gyr_cal(void){
 
 
 	for(int i = 0; i != 10000; i ++){
-		MPU_read_gyro(data);
+		MPU_read_gyr(data);
 
 		gyr_bias[0] += data[0]/10000.0;
 		gyr_bias[1] += data[1]/10000.0;

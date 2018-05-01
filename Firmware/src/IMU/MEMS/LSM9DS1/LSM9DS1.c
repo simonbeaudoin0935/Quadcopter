@@ -1,4 +1,4 @@
-#include "IMU/LSM9DS1/LSM9DS1.h"
+#include "IMU/MEMS/LSM9DS1/LSM9DS1.h"
 #include "COM/SPI/SPI1.h"
 #include "FreeRTOS.h"
 #include "task.h"
@@ -22,7 +22,7 @@ static float acc_multiplier  = 0.000061;
 static float mag_multiplier  = 0.00014;
 
 static float acc_bias[3] = {0.0, -0.11, 0.2};
-static float gyr_bias[3] = {-5.75, 5.0, -0.75};
+static float gyr_bias[3] = {-4.8, -3.5, -0.0};
 static float mag_bias[3] = {0.0, 0.0, 0.0};
 
 void LSM_init(void){

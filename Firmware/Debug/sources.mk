@@ -20,9 +20,9 @@ src/COM/I2C \
 src/COM/SPI \
 src/COM/UART \
 src/FreeRTOS \
-src/IMU/ADA9DOF \
-src/IMU/LSM9DS1 \
-src/IMU/MPU9250 \
+src/IMU/MEMS/ADA9DOF \
+src/IMU/MEMS/LSM9DS1 \
+src/IMU/MEMS/MPU9250 \
 src/IMU/Madgwick \
 src/Tasks \
 src \
