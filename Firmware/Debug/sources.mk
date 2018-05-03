@@ -24,6 +24,7 @@ src/IMU/MEMS/ADA9DOF \
 src/IMU/MEMS/LSM9DS1 \
 src/IMU/MEMS/MPU9250 \
 src/IMU/Madgwick \
+src/Motor \
 src/Tasks \
 src \
 startup \

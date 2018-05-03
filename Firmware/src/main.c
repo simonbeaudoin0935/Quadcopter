@@ -14,6 +14,7 @@
 #include "COM/UART/UART1.h"
 #include "COM/UART/UART6.h"
 #include "COM/SPI/SPI1.h"
+#include "Motor/Motor.h"
 //#include "COM/I2C/I2C1.h"
 
 
@@ -62,8 +63,9 @@ void init_hardware(void){
 	GPIO_Init(GPIOC, &GPIO_InitStruct);
 
 	UART1_init(115200);
-	UART6_init(115200);
+	UART6_init(9600);
 	SPI1_init();
+	Motors_init(200);
 }
 
 

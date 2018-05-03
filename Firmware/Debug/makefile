@@ -10,6 +10,7 @@ RM := rm -rf
 -include sources.mk
 -include startup/subdir.mk
 -include src/Tasks/subdir.mk
+-include src/Motor/subdir.mk
 -include src/IMU/Madgwick/subdir.mk
 -include src/IMU/MEMS/MPU9250/subdir.mk
 -include src/IMU/MEMS/LSM9DS1/subdir.mk

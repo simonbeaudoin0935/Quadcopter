@@ -5,6 +5,8 @@
 #include "COM/UART/UART1.h"
 #include "COM/UART/UART6.h"
 
+#include "Motor/Motor.h"
+
 void vTask_FlashHeartbeatLED(void * pvParameters);
 
 TaskHandle_t vCreateTask_FlashHeartbeatLED(uint32_t stack_size)
@@ -48,9 +50,10 @@ void vTask_FlashHeartbeatLED( void * pvParameters )
 
     	xSemaphoreTake(xUART1Semphr, portMAX_DELAY);
 
-    		for(int i = 0; i != len; i++) UART6_write(TXbuf[i]);
+    		for(int i = 0; i != len; i++) UART1_write(TXbuf[i]);
 
     	xSemaphoreGive(xUART1Semphr);
+
 
         vTaskDelay(1000);
     }

@@ -53,9 +53,9 @@ void vTask_SendAttitudeMessage( void * pvParameters )
 								  200,
 								  &msg,
 								  xTaskGetTickCount(),
-								  roll * DEG_2_RAD,
-								  pitch * DEG_2_RAD,
-								  yaw * DEG_2_RAD,
+								  roll,
+								  pitch,
+								  yaw,
 								  x_rate * DEG_2_RAD,
 								  y_rate * DEG_2_RAD,
  								  z_rate * DEG_2_RAD);
@@ -67,10 +67,10 @@ void vTask_SendAttitudeMessage( void * pvParameters )
 
     	xSemaphoreTake(xUART1Semphr, portMAX_DELAY);
 
-    		for(int i = 0; i != len; i++) UART6_write(TXbuf[i]);
+    		for(int i = 0; i != len; i++) UART1_write(TXbuf[i]);
 
     	xSemaphoreGive(xUART1Semphr);
 
-        vTaskDelay(100);
+        vTaskDelay(20);
     }
 }
