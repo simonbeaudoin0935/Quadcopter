@@ -3,10 +3,11 @@
 #include "Mavlink/common/mavlink.h"
 #include "semphr.h"
 #include "COM/UART/UART1.h"
+#include "COM/UART/UART6.h"
 
 void vTask_FlashHeartbeatLED(void * pvParameters);
 
-TaskHandle_t vCreateTask_FlashHeartbeatLED(void)
+TaskHandle_t vCreateTask_FlashHeartbeatLED(uint32_t stack_size)
 {
 	BaseType_t xReturned;
 	TaskHandle_t xHandle = NULL;
@@ -15,7 +16,7 @@ TaskHandle_t vCreateTask_FlashHeartbeatLED(void)
     xReturned = xTaskCreate(
     		        vTask_FlashHeartbeatLED,       /* Function that implements the task. */
                     "Flash LED",          /* Text name for the task. */
-					512,      /* Stack size in words, not bytes. */
+					stack_size,      /* Stack size in words, not bytes. */
                     NULL,    /* Parameter passed into the task. */
 					tskIDLE_PRIORITY,/* Priority at which the task is created. */
                     &xHandle );      /* Used to pass out the created task's handle. */
@@ -34,17 +35,6 @@ extern SemaphoreHandle_t xUART1Semphr;
 
 void vTask_FlashHeartbeatLED( void * pvParameters )
 {
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
-
-	GPIO_InitTypeDef GPIO_InitStruct;
-	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
-	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
-	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;
-	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;
-	GPIO_Init(GPIOC, &GPIO_InitStruct);
-
-
 	uint8_t TXbuf[256];
 	uint16_t len;
 	mavlink_message_t msg;
@@ -58,7 +48,7 @@ void vTask_FlashHeartbeatLED( void * pvParameters )
 
     	xSemaphoreTake(xUART1Semphr, portMAX_DELAY);
 
-    		for(int i = 0; i != len; i++) UART1_write(TXbuf[i]);
+    		for(int i = 0; i != len; i++) UART6_write(TXbuf[i]);
 
     	xSemaphoreGive(xUART1Semphr);
 

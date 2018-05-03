@@ -1,6 +1,5 @@
 #include "Tasks/Task_IMURead.h"
-#include "COM/SPI/SPI1.h"
-#include "COM/I2C/I2C1.h"
+
 
 #include "IMU/MEMS/MPU9250/MPU9250.h"
 #include "IMU/MEMS/LSM9DS1/LSM9DS1.h"
@@ -11,6 +10,8 @@
 
 #include "IMU/Madgwick/madgwick.h"
 
+float roll,pitch,yaw;
+float x_rate, y_rate, z_rate;
 
 static float mpu_gyr_data[3];
 static float mpu_acc_data[3];
@@ -30,15 +31,13 @@ static void vTask_IMURead( void * pvParameters )
 {
 
 
-   	SPI1_init();
-   	I2C1_init();
+
 	MPU_init();
 	LSM_init();
 	ADA_init();
 
 	Madgwick_init(50,1);
 
-	UART6_init(115200);
 
 	//MPU_acc_cal();
 	//MPU_gyr_cal();
@@ -55,6 +54,10 @@ static void vTask_IMURead( void * pvParameters )
     	MPU_read_gyr(mpu_gyr_data);
     	MPU_read_acc(mpu_acc_data);
     	MPU_read_mag(mpu_mag_data);
+
+    	x_rate = mpu_gyr_data[0];
+    	y_rate = mpu_gyr_data[1];
+    	z_rate = mpu_gyr_data[2];
 //
 //    	LSM_read_gyr(lsm_gyr_data);
 //    	LSM_read_acc(lsm_acc_data);
@@ -73,24 +76,24 @@ static void vTask_IMURead( void * pvParameters )
 						 mpu_mag_data[1],
 						 mpu_mag_data[2]);
 
-    	float roll,pitch,yaw;
+
     	computeAngles(&roll,&pitch,&yaw);
 
 
-    	UART6_write('#');
-    	UART6_write(0x01);
-    	UART6_write(24);
-
-    	UART6_writeFloatUnion(roll);
-    	UART6_writeFloatUnion(pitch);
-    	UART6_writeFloatUnion(yaw);
-
-     	UART6_writeFloatUnion(0);
-       	UART6_writeFloatUnion(0);
-        UART6_writeFloatUnion(0);
-
-
-    	UART6_write('.');
+//    	UART6_write('#');
+//    	UART6_write(0x01);
+//    	UART6_write(24);
+//
+//    	UART6_writeFloatUnion(roll);
+//    	UART6_writeFloatUnion(pitch);
+//    	UART6_writeFloatUnion(yaw);
+//
+//     	UART6_writeFloatUnion(0);
+//       	UART6_writeFloatUnion(0);
+//        UART6_writeFloatUnion(0);
+//
+//
+//    	UART6_write('.');
 
 
   	   	GPIO_ToggleBits(GPIOC, GPIO_Pin_14);
@@ -101,7 +104,7 @@ static void vTask_IMURead( void * pvParameters )
     }
 }
 
-TaskHandle_t vCreateTask_IMURead(void)
+TaskHandle_t vCreateTask_IMURead(uint32_t stack_size)
 {
 	BaseType_t xReturned;
 	TaskHandle_t xHandle = NULL;
@@ -110,7 +113,7 @@ TaskHandle_t vCreateTask_IMURead(void)
     xReturned = xTaskCreate(
     		        vTask_IMURead,       /* Function that implements the task. */
                     "IMU Read",          /* Text name for the task. */
-					1024,      /* Stack size in words, not bytes. */
+					stack_size,      /* Stack size in words, not bytes. */
                     NULL,    /* Parameter passed into the task. */
 					tskIDLE_PRIORITY+4,/* Priority at which the task is created. */
                     &xHandle );      /* Used to pass out the created task's handle. */

@@ -10,7 +10,7 @@
 
 void vTask_RPIReception(void * pvParameters);
 
-TaskHandle_t vCreateTask_RPIReception()
+TaskHandle_t vCreateTask_RPIReception(uint32_t stack_size)
 {
 	BaseType_t xReturned;
 	TaskHandle_t xHandle = NULL;
@@ -18,7 +18,7 @@ TaskHandle_t vCreateTask_RPIReception()
 	/* Create the task, storing the handle. */
     xReturned = xTaskCreate(vTask_RPIReception,       /* Function that implements the task. */
 	                        "RPI_Rec",          /* Text name for the task. */
-						    configMINIMAL_STACK_SIZE,      /* Stack size in words, not bytes. */
+							stack_size,      /* Stack size in words, not bytes. */
 	                        NULL,    /* Parameter passed into the task. */
 	                        tskIDLE_PRIORITY+2,/* Priority at which the task is created. */
 	                        &xHandle );      /* Used to pass out the created task's handle. */

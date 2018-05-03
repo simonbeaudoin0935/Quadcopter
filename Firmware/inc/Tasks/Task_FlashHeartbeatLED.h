@@ -4,6 +4,6 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-TaskHandle_t vCreateTask_FlashHeartbeatLED(void);
+TaskHandle_t vCreateTask_FlashHeartbeatLED(uint32_t stack_size);
 
 #endif //TASK_FLASHHEARTBEATLED_H

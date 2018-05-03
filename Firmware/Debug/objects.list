@@ -63,6 +63,7 @@
 "src/Tasks/Task_IMURead.o"
 "src/Tasks/Task_PIDLoop.o"
 "src/Tasks/Task_RPIReception.o"
+"src/Tasks/Task_SendAttitudeMessage.o"
 "src/main.o"
 "src/stm32f4xx_it.o"
 "src/syscalls.o"

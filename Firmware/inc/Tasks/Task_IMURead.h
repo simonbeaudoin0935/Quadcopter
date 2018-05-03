@@ -11,6 +11,6 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-TaskHandle_t vCreateTask_IMURead(void);
+TaskHandle_t vCreateTask_IMURead(uint32_t stack_size);
 
 #endif /* TASKS_TASK_IMUREAD_H_ */

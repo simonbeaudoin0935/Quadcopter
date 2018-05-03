@@ -11,7 +11,12 @@ void NMI_Handler(void){
 }
 
 void HardFault_Handler(void){
-	while(1);
+	while(1){
+		GPIOC->BSRRL = GPIO_Pin_13 | GPIO_Pin_14;
+		for(int i = 0; i != 200000; i++);
+		GPIOC->BSRRH = GPIO_Pin_13 | GPIO_Pin_14;
+		for(int i = 0; i != 2000000; i++);
+	}
 }
 
 void MemManage_Handler(void){
