@@ -6,7 +6,7 @@
 #define MPU_select   GPIOC->BSRRH = GPIO_Pin_11;
 #define MPU_deselect GPIOC->BSRRL = GPIO_Pin_11;
 
-static float acc_divider, gyr_divider, mag_multiplier = 0.6;
+static float acc_divider, gyr_divider; //, mag_multiplier = 0.6;
 
 static float acc_bias[3] = {-0.08, 0.0, -0.09};
 static float gyr_bias[3] = {1.0, -1.6, -0.6};
@@ -235,7 +235,7 @@ void MPU_read_mag(float mag_data[3]){
     MPU_WriteReg(MPUREG_I2C_SLV0_REG, AK8963_HXL);                 // I2C slave 0 register address from where to begin data transfer
     MPU_WriteReg(MPUREG_I2C_SLV0_CTRL, 0x87);                      // Read 6 bytes from the magnetometer
 
-    for(int i = 0; i != 100000; i++);
+    for(int i = 0; i != 1000; i++);
     MPU_ReadRegs(MPUREG_EXT_SENS_DATA_00,response,7);
     // must start your read from AK8963A register 0x03 and read seven bytes so that upon read of ST2 register 0x09 the AK8963A will unlatch the data registers for the next measurement.
 

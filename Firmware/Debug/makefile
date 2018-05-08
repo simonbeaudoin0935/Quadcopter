@@ -19,6 +19,7 @@ RM := rm -rf
 -include src/IMU/MEMS/ADA9DOF/subdir.mk
 -include src/FreeRTOS/subdir.mk
 -include src/COM/UART/subdir.mk
+-include src/COM/SWO/subdir.mk
 -include src/COM/SPI/subdir.mk
 -include src/COM/I2C/subdir.mk
 -include src/subdir.mk
@@ -46,7 +47,7 @@ all: Firmware.elf
 Firmware.elf: $(OBJS) $(USER_OBJS) /home/simon/Documents/Quadcopter/Firmware/LinkerScript.ld
 	@echo 'Building target: $@'
 	@echo 'Invoking: MCU GCC Linker'
-	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -T"/home/simon/Documents/Quadcopter/Firmware/LinkerScript.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "Firmware.elf" @"objects.list" $(USER_OBJS) $(LIBS) -lm
+	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -specs=nosys.specs -specs=nano.specs -T"/home/simon/Documents/Quadcopter/Firmware/LinkerScript.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "Firmware.elf" @"objects.list" $(USER_OBJS) $(LIBS) -lm
 	@echo 'Finished building target: $@'
 	@echo ' '
 	$(MAKE) --no-print-directory post-build

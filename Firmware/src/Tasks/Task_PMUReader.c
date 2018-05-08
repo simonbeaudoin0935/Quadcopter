@@ -8,7 +8,7 @@
 
 void vTask_PMUReader(void * pvParameters);
 
-TaskHandle_t vCreateTask_PMUReader(uint32_t stack_size)
+TaskHandle_t vCreateTask_PMUReader(uint32_t stack_size, uint32_t priority)
 {
 	BaseType_t xReturned;
 	TaskHandle_t xHandle = NULL;
@@ -19,7 +19,7 @@ TaskHandle_t vCreateTask_PMUReader(uint32_t stack_size)
                     "PMU Read",          /* Text name for the task. */
 					stack_size,      /* Stack size in words, not bytes. */
                     NULL,    /* Parameter passed into the task. */
-					tskIDLE_PRIORITY+1,/* Priority at which the task is created. */
+					priority,/* Priority at which the task is created. */
                     &xHandle );      /* Used to pass out the created task's handle. */
 
     if( xReturned != pdPASS )

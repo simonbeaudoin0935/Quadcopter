@@ -6,7 +6,7 @@
 #include "string.h"
 #include "COM/UART/UART1.h"
 
-extern SemaphoreHandle_t xUART1Semphr;
+extern SemaphoreHandle_t xUART1Mutex;
 
 
 
@@ -30,11 +30,11 @@ void handle_param_request_read(mavlink_message_t* msg, mavlink_status_t* status)
 
 	uint16_t len = mavlink_msg_to_send_buffer(buf, msg);
 
-	xSemaphoreTake(xUART1Semphr, portMAX_DELAY);
+	xSemaphoreTake(xUART1Mutex, portMAX_DELAY);
 
 	   for(int i = 0; i != len; i++) UART1_write(buf[i]);
 
-	xSemaphoreGive(xUART1Semphr);
+	xSemaphoreGive(xUART1Mutex);
 }
 
 void handle_param_request_list(mavlink_message_t* msg, mavlink_status_t* status){
@@ -55,11 +55,11 @@ void handle_param_request_list(mavlink_message_t* msg, mavlink_status_t* status)
 									 i);
 			uint16_t len = mavlink_msg_to_send_buffer(buf, msg);
 
-	    	xSemaphoreTake(xUART1Semphr, portMAX_DELAY);
+	    	xSemaphoreTake(xUART1Mutex, portMAX_DELAY);
 
 	    		for(int j = 0; j != len; j++) UART1_write(buf[i]);
 
-	    	xSemaphoreGive(xUART1Semphr);
+	    	xSemaphoreGive(xUART1Mutex);
 	}
 }
 
@@ -75,7 +75,7 @@ void handle_param_set(mavlink_message_t* msg, mavlink_status_t* status){
 		}
 	}
 	param_list[param_index].value.floating = packet.param_value;
-	//todo verification
+	//TODO verification
 
 	uint8_t buf[50];
 	mavlink_msg_param_value_pack(1,
@@ -89,11 +89,11 @@ void handle_param_set(mavlink_message_t* msg, mavlink_status_t* status){
 
 	uint16_t len = mavlink_msg_to_send_buffer(buf, msg);
 
-	xSemaphoreTake(xUART1Semphr, portMAX_DELAY);
+	xSemaphoreTake(xUART1Mutex, portMAX_DELAY);
 
 	   for(int i = 0; i != len; i++) UART1_write(buf[i]);
 
-	xSemaphoreGive(xUART1Semphr);
+	xSemaphoreGive(xUART1Mutex);
 }
 
 void handle_mission_request_list(mavlink_message_t* msg, mavlink_status_t* status){

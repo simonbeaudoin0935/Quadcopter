@@ -18,6 +18,7 @@ SUBDIRS := \
 StdPeriph_Driver/src \
 src/COM/I2C \
 src/COM/SPI \
+src/COM/SWO \
 src/COM/UART \
 src/FreeRTOS \
 src/IMU/MEMS/ADA9DOF \

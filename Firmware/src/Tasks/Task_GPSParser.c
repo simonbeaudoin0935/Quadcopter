@@ -1,15 +1,18 @@
-#include "Tasks/Task_PIDLoop.h"
+#include "Tasks/Task_GPSParser.h"
 
-void vTask_PIDLoop(void * pvParameters);
+#include "stm32f4xx.h"
 
-TaskHandle_t vCreateTask_PIDLoop(uint32_t stack_size, uint32_t priority)
+
+static void vTask_GPSParser(void * pvParameters);
+
+TaskHandle_t vCreateTask_GPSParser(uint32_t stack_size, uint32_t priority)
 {
 	BaseType_t xReturned;
 	TaskHandle_t xHandle = NULL;
 
 	/* Create the task, storing the handle. */
-    xReturned = xTaskCreate(vTask_PIDLoop,       /* Function that implements the task. */
-	                        "PID Loop",          /* Text name for the task. */
+    xReturned = xTaskCreate(vTask_GPSParser,       /* Function that implements the task. */
+	                        "GPS_Parser",          /* Text name for the task. */
 							stack_size,      /* Stack size in words, not bytes. */
 	                        NULL,    /* Parameter passed into the task. */
 	                        priority,/* Priority at which the task is created. */
@@ -18,12 +21,13 @@ TaskHandle_t vCreateTask_PIDLoop(uint32_t stack_size, uint32_t priority)
 	if( xReturned != pdPASS ) return NULL;
 
 	return xHandle;
+
 }
 
-void vTask_PIDLoop(void * pvParameters)
+void vTask_GPSParser(void * pvParameters)
 {
-	while(1){
 
-		vTaskDelay(20); //execute at 50Hz
+	while(1){
+		vTaskDelay(1000);
 	}
 }

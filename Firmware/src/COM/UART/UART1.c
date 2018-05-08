@@ -3,12 +3,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-extern struct{
-	TaskHandle_t TaskHandle_Idle;
-	TaskHandle_t TaskHandle_FlashHeartbeatLED;
-	TaskHandle_t TaskHandle_RPIReception;
-	TaskHandle_t TaskHandle_PIDLoop;
-}TaskHandles;
+
 
 static volatile char UART1_rx_buf[UART1_RX_BUFF_SIZE];
 static volatile char UART1_tx_buf[UART1_TX_BUFF_SIZE];
@@ -65,18 +60,12 @@ void UART1_init(unsigned int p_baud_rate){
   USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
   
 //Activer interruption TX Empty
-  USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
+ // USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
   
 
 //Initialiser le NVIC pour activer l'interruption du USART1
-
-
-
-  
   NVIC_SetPriority(USART1_IRQn, 6);
   NVIC_EnableIRQ(USART1_IRQn);
-
-
 }
 
 char UART1_read(void){
@@ -115,7 +104,7 @@ void UART1_write(char p_data){
   //on boucle tant que le buffer est plein.
   while(v_index == UART1_tx_tail)
   {
-    //si on est en train de boucler ici, l'interruption de transfert finira pas arriver
+    //si on est en train de boucler ici, l'interruption de transfert finira par arriver
     //et liberera un byte dans le buffer
   }
   
@@ -149,6 +138,17 @@ void USART1_IRQHandler(void)
     UART1_rx_head = (UART1_rx_head + 1) % UART1_RX_BUFF_SIZE;   //On incrémente l'indice de tête, et fait un wrap around;
 
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+
+    extern struct{
+    	TaskHandle_t TaskHandle_FlashHeartbeatLED;
+    	TaskHandle_t TaskHandle_RPIReception;
+    	TaskHandle_t TaskHandle_PIDLoop;
+    	TaskHandle_t TaskHandle_IMURead;
+    	TaskHandle_t TaskHandle_SendAttitudeMessage;
+    	TaskHandle_t TaskHandle_PMUReader;
+    	TaskHandle_t TaskHandle_GPSParser;
+    }TaskHandles;
 
     vTaskNotifyGiveFromISR(TaskHandles.TaskHandle_RPIReception, &xHigherPriorityTaskWoken);
 

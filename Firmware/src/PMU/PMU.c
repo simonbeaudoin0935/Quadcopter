@@ -3,9 +3,16 @@
 void PMU_init(void){
 	//ch 8 : current
 	//ch 9 : volt
-
+	GPIO_InitTypeDef GPIO_StructInit;
 	ADC_InitTypeDef ADC_InitStruct;
 	ADC_CommonInitTypeDef ADC_CommonInitStruct;
+
+
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
+	GPIO_StructInit.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1;
+	GPIO_StructInit.GPIO_Mode = GPIO_Mode_AN;
+	GPIO_StructInit.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_Init(GPIOB,&GPIO_StructInit);
 
 	/* Init ADC settings */
 	ADC_InitStruct.ADC_ContinuousConvMode = DISABLE;

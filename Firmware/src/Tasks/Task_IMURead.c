@@ -19,15 +19,15 @@ static float mpu_mag_data[3];
 
 int16_t mag[3];
 
-static float lsm_gyr_data[3];
-static float lsm_acc_data[3];
-static float lsm_mag_data[3];
+//static float lsm_gyr_data[3];
+//static float lsm_acc_data[3];
+//static float lsm_mag_data[3];
 
-static float ada_gyr_data[3];
-static float ada_acc_data[3];
-static float ada_mag_data[3];
+//static float ada_gyr_data[3];
+//static float ada_acc_data[3];
+//static float ada_mag_data[3];
 
-static void init_tim1_interrupt(void);
+
 
 static void vTask_IMURead( void * pvParameters )
 {
@@ -47,7 +47,7 @@ static void vTask_IMURead( void * pvParameters )
 
     while(1)
     {
-    	uint32_t ulNotifiedValue = ulTaskNotifyTake( pdTRUE, portMAX_DELAY );
+    	ulTaskNotifyTake( pdTRUE, portMAX_DELAY );
 
     	MPU_read_gyr(mpu_gyr_data);
     	MPU_read_acc(mpu_acc_data);
@@ -85,7 +85,7 @@ static void vTask_IMURead( void * pvParameters )
     }
 }
 
-TaskHandle_t vCreateTask_IMURead(uint32_t stack_size)
+TaskHandle_t vCreateTask_IMURead(uint32_t stack_size, uint32_t priority)
 {
 	BaseType_t xReturned;
 	TaskHandle_t xHandle = NULL;
@@ -96,7 +96,7 @@ TaskHandle_t vCreateTask_IMURead(uint32_t stack_size)
                     "IMU Read",          /* Text name for the task. */
 					stack_size,      /* Stack size in words, not bytes. */
                     NULL,    /* Parameter passed into the task. */
-					tskIDLE_PRIORITY+4,/* Priority at which the task is created. */
+					priority,/* Priority at which the task is created. */
                     &xHandle );      /* Used to pass out the created task's handle. */
 
     if( xReturned != pdPASS )
@@ -109,11 +109,7 @@ TaskHandle_t vCreateTask_IMURead(uint32_t stack_size)
 }
 
 
-void init_tim1_interrupt(void){
 
-	  // Clock enable
-
-}
 
 void TIM3_IRQHandler(void){
 	extern struct{
