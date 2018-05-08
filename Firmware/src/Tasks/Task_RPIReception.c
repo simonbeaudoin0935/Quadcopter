@@ -8,7 +8,8 @@
 #include "COM/UART/UART1.h"
 #include "Mavlink/common/mavlink.h"
 
-void vTask_RPIReception(void * pvParameters);
+static void handleIncomingMavlinkMessage(mavlink_message_t* msg, mavlink_status_t* status);
+static void vTask_RPIReception(void * pvParameters);
 
 TaskHandle_t vCreateTask_RPIReception(uint32_t stack_size)
 {
@@ -55,11 +56,15 @@ void vTask_RPIReception(void * pvParameters)
 
 		        if(mavlink_parse_char(MAVLINK_COMM_0, c, &rcv_msg, &rcv_status))
 		        {
-		        	//handleIncomingMessage(&rcv_msg,&rcv_status);
+		        	handleIncomingMavlinkMessage(&rcv_msg,&rcv_status);
 		        }
 
 		        ulNotifiedValue--;
 		    }
 		}
 	}
+}
+
+void handleIncomingMavlinkMessage(mavlink_message_t* msg, mavlink_status_t* status){
+
 }

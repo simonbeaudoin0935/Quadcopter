@@ -6,11 +6,12 @@
 #define MPU_select   GPIOC->BSRRH = GPIO_Pin_11;
 #define MPU_deselect GPIOC->BSRRL = GPIO_Pin_11;
 
-static float acc_divider, gyr_divider, mag_divider = 1.0;
+static float acc_divider, gyr_divider, mag_multiplier = 0.6;
 
 static float acc_bias[3] = {-0.08, 0.0, -0.09};
 static float gyr_bias[3] = {1.0, -1.6, -0.6};
-static float mag_bias[3] = {0.0, 0.0, 0.0};
+static float mag_bias[3] = {0.68, 10.46, -3.37};
+static const float mag_comp[3][3] = {{1.003,0.013,-0.018},{0.013,1.028,0.012},{-0.018,0.012,0.971}};
 
 
 static uint8_t MPU_WriteReg(uint8_t WriteAddr, uint8_t WriteData );
@@ -237,10 +238,21 @@ void MPU_read_mag(float mag_data[3]){
     for(int i = 0; i != 100000; i++);
     MPU_ReadRegs(MPUREG_EXT_SENS_DATA_00,response,7);
     // must start your read from AK8963A register 0x03 and read seven bytes so that upon read of ST2 register 0x09 the AK8963A will unlatch the data registers for the next measurement.
-    mag_data[0] = ((float)((int16_t)((response[1]<<8) + response[0]))) * 0.6 - mag_bias[0];
-    mag_data[1] = ((float)((int16_t)((response[3]<<8) + response[2]))) * 0.6 - mag_bias[1];
-    mag_data[2] = ((float)((int16_t)((response[5]<<8) + response[4]))) * 0.6 - mag_bias[2];
 
+//    extern int16_t mag[3];
+//    mag[0] = (int16_t)((response[1]<<8) + response[0]);
+//    mag[1] = (int16_t)((response[3]<<8) + response[2]);
+//    mag[2] = (int16_t)((response[5]<<8) + response[4]);
+
+    float x = ((float)((int16_t)((response[1]<<8) + response[0])))  - mag_bias[0];
+    float y = ((float)((int16_t)((response[3]<<8) + response[2])))  - mag_bias[1];
+    float z = ((float)((int16_t)((response[5]<<8) + response[4])))  - mag_bias[2];
+
+    //x and y inversed
+    mag_data[1] = x * mag_comp[0][0] + y * mag_comp[0][1] + z * mag_comp[0][2];
+    mag_data[0] = x * mag_comp[1][0] + y * mag_comp[1][1] + z * mag_comp[1][2];
+    //z flipped
+    mag_data[2] = -(x * mag_comp[2][0] + y * mag_comp[2][1] + z * mag_comp[2][2]);
 
 
 }

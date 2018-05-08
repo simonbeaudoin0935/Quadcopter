@@ -5,7 +5,7 @@
 #include "COM/UART/UART1.h"
 #include "COM/UART/UART6.h"
 
-#include "Motor/Motor.h"
+
 
 void vTask_FlashHeartbeatLED(void * pvParameters);
 
@@ -54,6 +54,34 @@ void vTask_FlashHeartbeatLED( void * pvParameters )
 
     	xSemaphoreGive(xUART1Semphr);
 
+    	extern float voltage, current, energy_drained;
+    	mavlink_msg_sys_status_pack(1, 200, &msg,
+
+				MAV_SYS_STATUS_SENSOR_3D_GYRO |
+				MAV_SYS_STATUS_SENSOR_3D_ACCEL|
+				MAV_SYS_STATUS_SENSOR_3D_MAG  |
+				MAV_SYS_STATUS_SENSOR_GPS,
+
+				MAV_SYS_STATUS_SENSOR_3D_GYRO |
+				MAV_SYS_STATUS_SENSOR_3D_ACCEL|
+				MAV_SYS_STATUS_SENSOR_3D_MAG,
+
+				MAV_SYS_STATUS_SENSOR_3D_GYRO |
+				MAV_SYS_STATUS_SENSOR_3D_ACCEL|
+				MAV_SYS_STATUS_SENSOR_3D_MAG,
+				100,
+				(uint16_t)(voltage*1000.0),
+				(uint16_t)(current*100.0),
+				100-(uint8_t)(((energy_drained)/4000.0)*100.0),
+				0,0,0,0,0,0);
+
+    	len = mavlink_msg_to_send_buffer(TXbuf, &msg);
+
+    	xSemaphoreTake(xUART1Semphr, portMAX_DELAY);
+
+    		for(int i = 0; i != len; i++) UART1_write(TXbuf[i]);
+
+    	xSemaphoreGive(xUART1Semphr);
 
         vTaskDelay(1000);
     }

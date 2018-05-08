@@ -6,6 +6,7 @@
 #include "Tasks/Task_PIDLoop.h"
 #include "Tasks/Task_IMURead.h"
 #include "Tasks/Task_SendAttitudeMessage.h"
+#include "Tasks/Task_PMUReader.h"
 
 #include "semphr.h"
 
@@ -15,6 +16,7 @@
 #include "COM/UART/UART6.h"
 #include "COM/SPI/SPI1.h"
 #include "Motor/Motor.h"
+#include "PMU/PMU.h"
 //#include "COM/I2C/I2C1.h"
 
 
@@ -24,6 +26,7 @@ struct{
 	TaskHandle_t TaskHandle_PIDLoop;
 	TaskHandle_t TaskHandle_IMURead;
 	TaskHandle_t TaskHandle_SendAttitudeMessage;
+	TaskHandle_t TaskHandle_PMUReader;
 }TaskHandles;
 
 SemaphoreHandle_t xUART1Semphr;
@@ -39,9 +42,10 @@ int main(void)
 
 	TaskHandles.TaskHandle_FlashHeartbeatLED = vCreateTask_FlashHeartbeatLED(configMINIMAL_STACK_SIZE+256);
 	TaskHandles.TaskHandle_RPIReception = vCreateTask_RPIReception(configMINIMAL_STACK_SIZE+200);
-	TaskHandles.TaskHandle_PIDLoop = vCreateTask_PIDLoop(configMINIMAL_STACK_SIZE+256);
-	TaskHandles.TaskHandle_IMURead = vCreateTask_IMURead(configMINIMAL_STACK_SIZE + 512);
+	//TaskHandles.TaskHandle_PIDLoop = vCreateTask_PIDLoop(configMINIMAL_STACK_SIZE+256);
+	TaskHandles.TaskHandle_IMURead = vCreateTask_IMURead(configMINIMAL_STACK_SIZE + 712);
 	TaskHandles.TaskHandle_SendAttitudeMessage = vCreateTask_SendAttitudeMessage(configMINIMAL_STACK_SIZE+512);
+	TaskHandles.TaskHandle_PMUReader = vCreateTask_PMUReader(configMINIMAL_STACK_SIZE);
 
 
 	vTaskStartScheduler();
@@ -63,9 +67,10 @@ void init_hardware(void){
 	GPIO_Init(GPIOC, &GPIO_InitStruct);
 
 	UART1_init(115200);
-	UART6_init(9600);
+	UART6_init(115200);
 	SPI1_init();
 	Motors_init(200);
+	PMU_init();
 }
 
 
