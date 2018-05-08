@@ -66,5 +66,34 @@ void vTask_RPIReception(void * pvParameters)
 }
 
 void handleIncomingMavlinkMessage(mavlink_message_t* msg, mavlink_status_t* status){
-
+	switch(msg->msgid)
+		{
+			case(0):
+				handle_heartbeat(msg);
+				break;
+			case(20):
+				handle_param_request_read(msg);
+				break;
+			case(21):
+				handle_param_request_list(msg);
+				break;
+			case(23):
+				handle_param_set(msg);
+				break;
+			case(43):
+				handle_mission_request_list(msg);
+				break;
+			case(47):
+				handle_mission_ack(msg);
+				break;
+			case(69):
+				handle_manual_control(msg);
+				break;
+			case(76):
+				handle_command_long(msg);
+				break;
+			default:
+				//printf("\nReceived packet: SYS: %d, COMP: %d, LEN: %d, MSG ID: %d\n", msg->sysid, msg->compid, msg->len, msg->msgid);
+				break;
+		}
 }

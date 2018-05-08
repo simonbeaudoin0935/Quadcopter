@@ -26,6 +26,7 @@ src/IMU/MEMS/MPU9250 \
 src/IMU/Madgwick \
 src/Motor \
 src/PMU \
+src/ParameterManager \
 src/Tasks \
 src \
 startup \
