@@ -28,14 +28,14 @@ void Motors_init(uint32_t hertz){
 		TIM2 is connected to APB1 bus, which is 84 MHz / 2 = 42 MHz
 
 		timer_tick_frequency = Timer_default_frequency / (prescaller_set + 1)
-		timer_tick_frequency = 42 000 000 / (20 + 1) = 2 MHZ
+		timer_tick_frequency = 42 000 000 / (20 + 1) = 1 MHZ
 
 		We want a PWM frequency of 'hertz' Hz
 		TIM_Period = (timer_tick_frequency / PWM_frequency) - 1
-		TIM_Period = (2000000 / 200) - 1 = 19,999
+		TIM_Period = (2000000 / 100) - 1 = 19,999
 	*/
 
-	TIM_BaseStruct.TIM_Prescaler = 20;						//Gives a tick frequency of 1.68 MHz
+	TIM_BaseStruct.TIM_Prescaler = 20;						//Gives a tick frequency of 2MHz
 	TIM_BaseStruct.TIM_CounterMode = TIM_CounterMode_Up;	//Counts up
 	TIM_BaseStruct.TIM_Period = 19999;						//Gives PWM frequency of 200 Hz
 	TIM_BaseStruct.TIM_ClockDivision = TIM_CKD_DIV1;

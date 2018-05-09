@@ -27,6 +27,14 @@ int16_t mag[3];
 //static float ada_acc_data[3];
 //static float ada_mag_data[3];
 
+extern struct{
+	TaskHandle_t TaskHandle_FlashHeartbeatLED;
+	TaskHandle_t TaskHandle_RPIReception;
+	TaskHandle_t TaskHandle_PIDLoop;
+	TaskHandle_t TaskHandle_IMURead;
+	TaskHandle_t TaskHandle_SendAttitudeMessage;
+	TaskHandle_t TaskHandle_PMUReader;
+}TaskHandles;
 
 
 static void vTask_IMURead( void * pvParameters )
@@ -71,6 +79,10 @@ static void vTask_IMURead( void * pvParameters )
     	computeAngles(&roll,&pitch,&yaw);
 
 
+    	xTaskNotifyGive(TaskHandles.TaskHandle_PIDLoop);
+
+
+
 //    	UART6_write('#');
 //    	UART6_write(0x01);
 //    	UART6_write(24);
@@ -112,14 +124,7 @@ TaskHandle_t vCreateTask_IMURead(uint32_t stack_size, uint32_t priority)
 
 
 void TIM3_IRQHandler(void){
-	extern struct{
-		TaskHandle_t TaskHandle_FlashHeartbeatLED;
-		TaskHandle_t TaskHandle_RPIReception;
-		TaskHandle_t TaskHandle_PIDLoop;
-		TaskHandle_t TaskHandle_IMURead;
-		TaskHandle_t TaskHandle_SendAttitudeMessage;
-		TaskHandle_t TaskHandle_PMUReader;
-	}TaskHandles;
+
 
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 

@@ -64,7 +64,7 @@ int main(void)
 															tskIDLE_PRIORITY+1);
 
 	TaskHandles.TaskHandle_PMUReader           = vCreateTask_PMUReader(
-														    configMINIMAL_STACK_SIZE,
+														    configMINIMAL_STACK_SIZE+200,
 															tskIDLE_PRIORITY+1);
 
 	TaskHandles.TaskHandle_GPSParser           = vCreateTask_GPSParser(

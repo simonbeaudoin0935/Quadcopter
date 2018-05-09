@@ -36,12 +36,33 @@ float current = 0.0, voltage = 0.0, energy_drained = 0.0;
 
 void vTask_PMUReader( void * pvParameters )
 {
+#define N 50
+	float mfv[N];
+	float mfc[N];
+	int i = 0;
+
+
+	for(int j = 0; j != N; j++){
+		mfv[j] = 0.0;
+		mfc[j] = 0.0;
+	}
 
     while(1)
     {
-    	PMU_read(&voltage, &current);
-    	energy_drained += voltage * current * 0.1;
+    	float v,c;
+    	PMU_read(&v, &c);
 
-        vTaskDelay(100);
+    	voltage -= mfv[i];
+    	mfv[i] = v/N;
+    	voltage += mfv[i];
+    	current -= mfc[i];
+    	mfc[i] = c/N;
+    	current += mfc[i];
+    	i++;
+    	if(i == N) i = 0;
+
+    	energy_drained += voltage * current * 0.05;
+
+        vTaskDelay(50);
     }
 }

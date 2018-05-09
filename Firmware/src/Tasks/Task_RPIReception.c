@@ -9,6 +9,8 @@
 #include "Mavlink/common/mavlink.h"
 #include "stm32f4xx.h"
 #include "Tasks/mavlink_handlers.h"
+#include "COM/UART/UART6.h"
+#include "stdio.h"
 
 static void handleIncomingMavlinkMessage(mavlink_message_t* msg, mavlink_status_t* status);
 
@@ -39,6 +41,7 @@ static void vTask_RPIReception(void * pvParameters)
 		        if(mavlink_parse_char(MAVLINK_COMM_0, c, &rcv_msg, &rcv_status))
 		        {
 		        	handleIncomingMavlinkMessage(&rcv_msg,&rcv_status);
+
 		        }
 
 		        ulNotifiedValue--;
@@ -48,6 +51,8 @@ static void vTask_RPIReception(void * pvParameters)
 }
 
 void handleIncomingMavlinkMessage(mavlink_message_t* msg, mavlink_status_t* status){
+	char s[100];
+
 	switch(msg->msgid)
 		{
 			case(0):
@@ -55,18 +60,26 @@ void handleIncomingMavlinkMessage(mavlink_message_t* msg, mavlink_status_t* stat
 				break;
 			case(20):
 				handle_param_request_read(msg, status);
+				UART6_print("Received : Param_request_read\n\r");
 				break;
 			case(21):
 				handle_param_request_list(msg, status);
+				UART6_print("Received : Param_request_list\n\r");
+				break;
+			case(22):
+				UART6_print("Received : Param_value\n\r");
 				break;
 			case(23):
 				handle_param_set(msg, status);
+				UART6_print("Received : Param_set\n\r");
 				break;
 			case(43):
 				handle_mission_request_list(msg, status);
+				UART6_print("Received : mission_request_list\n\r");
 				break;
 			case(47):
 				handle_mission_ack(msg, status);
+				UART6_print("Received : mission_ack\n\r");
 				break;
 			case(69):
 				handle_manual_control(msg, status);
@@ -75,7 +88,10 @@ void handleIncomingMavlinkMessage(mavlink_message_t* msg, mavlink_status_t* stat
 				handle_command_long(msg, status);
 				break;
 			default:
-				//printf("\nReceived packet: SYS: %d, COMP: %d, LEN: %d, MSG ID: %d\n", msg->sysid, msg->compid, msg->len, msg->msgid);
+				for(int i = 0; i != 100; i++)s[i]=0;
+				sprintf(s,"Received packet: SYS: %d, COMP: %d, LEN: %d, MSG ID: %d\n\r", msg->sysid, msg->compid, msg->len, msg->msgid);
+				UART6_print(s);
+
 				break;
 		}
 }
