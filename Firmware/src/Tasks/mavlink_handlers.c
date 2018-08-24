@@ -110,25 +110,29 @@ void handle_mission_request_list(mavlink_message_t* msg, mavlink_status_t* statu
 
 	xSemaphoreGive(xUART1Mutex);
 
-	UART6_print("Sent : mission_count");
-
 }
 
 void handle_mission_ack(mavlink_message_t* msg, mavlink_status_t* status){
 
 }
 
-float x;
+struct{
+	int16_t x;
+	int16_t y;
+	int16_t z;
+	int16_t r;
+	uint16_t buttons;
+}Manual_Setpoint;
 
 void handle_manual_control(mavlink_message_t* msg, mavlink_status_t* status){
 	mavlink_manual_control_t packet;
 	mavlink_msg_manual_control_decode(msg, &packet);
 
-	x = ((float)(packet.z))/1000.0;
-	char s[60];
-	for(int i = 0; i!=60;i++)s[i]=0;
-	sprintf(s, "X : %d, Y: %d, Z: %d, R: %d, BUTTONS : %d\n\r",packet.x,packet.y,packet.z,packet.r,packet.buttons);
-	UART6_print(s);
+	Manual_Setpoint.x = packet.x;
+	Manual_Setpoint.y = packet.y;
+	Manual_Setpoint.z = packet.z;
+	Manual_Setpoint.r = packet.r;
+	Manual_Setpoint.buttons = packet.buttons;
 }
 
 void handle_command_long(mavlink_message_t* msg, mavlink_status_t* status){
@@ -165,10 +169,6 @@ void handle_command_long(mavlink_message_t* msg, mavlink_status_t* status){
 
 
 	}
-	char s[60];
-	for(int i = 0; i!=60;i++)s[i]=0;
-	sprintf(s, "Command long : %d, %d, %d\n\r",packet.command,packet.confirmation, (int)packet.param1);
-	UART6_print(s);
 }
 
 

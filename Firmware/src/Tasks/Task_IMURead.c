@@ -10,8 +10,20 @@
 
 #include "IMU/Madgwick/madgwick.h"
 
-float roll,pitch,yaw;
-float x_rate, y_rate, z_rate;
+
+
+struct{
+	float roll;
+	float pitch;
+	float yaw;
+	float x_rate;
+	float y_rate;
+	float z_rate;
+	float x_acc;
+	float y_acc;
+	float z_acc;
+
+}IMU;
 
 static float mpu_gyr_data[3];
 static float mpu_acc_data[3];
@@ -19,13 +31,7 @@ static float mpu_mag_data[3];
 
 int16_t mag[3];
 
-//static float lsm_gyr_data[3];
-//static float lsm_acc_data[3];
-//static float lsm_mag_data[3];
 
-//static float ada_gyr_data[3];
-//static float ada_acc_data[3];
-//static float ada_mag_data[3];
 
 extern struct{
 	TaskHandle_t TaskHandle_FlashHeartbeatLED;
@@ -41,7 +47,7 @@ static void vTask_IMURead( void * pvParameters )
 {
 	MPU_init();
 	LSM_init();
-	ADA_init();
+
 
 	Madgwick_init(200,1);
 
@@ -50,7 +56,7 @@ static void vTask_IMURead( void * pvParameters )
 	TIM3->ARR = 4999;	//interrupt freq 200 hz
 	TIM3->DIER = TIM_DIER_UIE; // Enable update interrupt (timer level)
 	TIM3->CR1 = TIM_CR1_CEN;   // Enable timer
-	NVIC_SetPriority(TIM3_IRQn, 7);
+	NVIC_SetPriority(TIM3_IRQn, 5);
 	NVIC_EnableIRQ(TIM3_IRQn);
 
     while(1)
@@ -59,11 +65,21 @@ static void vTask_IMURead( void * pvParameters )
 
     	MPU_read_gyr(mpu_gyr_data);
     	MPU_read_acc(mpu_acc_data);
-    	MPU_read_mag(mpu_mag_data);
 
-    	x_rate = mpu_gyr_data[0];
-    	y_rate = mpu_gyr_data[1];
-    	z_rate = mpu_gyr_data[2];
+    	float mag[3];
+    	MPU_read_mag(mag);
+
+    	mpu_mag_data[0] = 0.9 * mpu_mag_data[0] + 0.1 * mag[0];
+    	mpu_mag_data[1] = 0.9 * mpu_mag_data[1] + 0.1 * mag[1];
+    	mpu_mag_data[2] = 0.9 * mpu_mag_data[2] + 0.1 * mag[2];
+
+    	IMU.x_rate = mpu_gyr_data[0];
+    	IMU.y_rate = mpu_gyr_data[1];
+    	IMU.z_rate = mpu_gyr_data[2];
+
+    	IMU.x_acc = mpu_mag_data[0];
+    	IMU.y_acc = mpu_mag_data[1];
+    	IMU.z_acc = mpu_mag_data[2];
 
     	Madgwick_compute(mpu_gyr_data[0],
     					 mpu_gyr_data[1],
@@ -76,8 +92,17 @@ static void vTask_IMURead( void * pvParameters )
 						 mpu_mag_data[2]);
 
 
-    	computeAngles(&roll,&pitch,&yaw);
+    	//pitch and roll inverted
+    	float roll, pitch, yaw;
+    	computeAngles(&pitch,&roll,&yaw);
 
+    	roll *= -1.0;
+    	pitch *= -1.0;
+    	yaw *= -1.0;
+
+    	IMU.pitch = 0.9 * IMU.pitch + 0.1 * pitch;
+    	IMU.roll  = 0.9 * IMU.roll + 0.1 * roll;
+    	IMU.yaw = 0.9 * IMU.yaw + 0.1 * yaw;
 
     	xTaskNotifyGive(TaskHandles.TaskHandle_PIDLoop);
 

@@ -45,20 +45,28 @@ void vTask_SendAttitudeMessage( void * pvParameters )
 
     while(1)
     {
-
-    	extern float roll,pitch,yaw;
-    	extern float x_rate, y_rate, z_rate;
+    	extern struct{
+    		float roll;
+    		float pitch;
+    		float yaw;
+    		float x_rate;
+    		float y_rate;
+    		float z_rate;
+    		float x_acc;
+    		float y_acc;
+    		float z_acc;
+    	}IMU;
 
 		mavlink_msg_attitude_pack(1,
 								  200,
 								  &msg,
 								  xTaskGetTickCount(),
-								  roll,
-								  pitch,
-								  yaw,
-								  x_rate * DEG_2_RAD,
-								  y_rate * DEG_2_RAD,
- 								  z_rate * DEG_2_RAD);
+								  IMU.roll,
+								  IMU.pitch,
+								  IMU.yaw,
+								  IMU.x_rate * DEG_2_RAD,
+								  IMU.y_rate * DEG_2_RAD,
+ 								  IMU.z_rate * DEG_2_RAD);
 
 		len = mavlink_msg_to_send_buffer(TXbuf, &msg);
 
